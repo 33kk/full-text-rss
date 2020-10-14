@@ -4,19 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-		"start": "node index.js",
-		"build": "tsc --esModuleInterop index.ts",
+    "start": "node index.js",
+    "build": "tsc --esModuleInterop index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@mozilla/readability": "^0.3.0",
     "fastify": "^3.6.0",
     "feed": "^4.2.1",
     "install": "^0.13.0",
     "jsdom": "^16.4.0",
+    "keyv": "^4.0.3",
     "node-fetch": "^2.6.1",
     "npm": "^6.14.8",
     "rss-parser": "^3.9.0"

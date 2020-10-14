@@ -4,6 +4,7 @@ dependencies:
   feed: 4.2.1
   install: 0.13.0
   jsdom: 16.4.0
+  keyv: 4.0.3
   node-fetch: 2.6.1
   npm: 6.14.8
   rss-parser: 3.9.0
@@ -503,6 +504,10 @@ packages:
         optional: true
     resolution:
       integrity: sha512-lYMm3wYdgPhrl7pDcRmvzPhhrGVBeVhPIqeHjzeiHN3DFmD1RBpbExbi8vU7BJdH8VAZYovR8DMt0PNNDM7k8w==
+  /json-buffer/3.0.1:
+    dev: false
+    resolution:
+      integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==
   /json-schema-traverse/0.4.1:
     dev: false
     resolution:
@@ -526,6 +531,12 @@ packages:
       '0': node >=0.6.0
     resolution:
       integrity: sha1-MT5mvB5cwG5Di8G3SZwuXFastqI=
+  /keyv/4.0.3:
+    dependencies:
+      json-buffer: 3.0.1
+    dev: false
+    resolution:
+      integrity: sha512-zdGa2TOpSZPq5mU6iowDARnMBZgtCqJ11dJROFi6tg6kTn4nuUdU09lFyLFSaHrWqpIJ+EBq4E8/Dc0Vx5vLdA==
   /levn/0.3.0:
     dependencies:
       prelude-ls: 1.1.2
@@ -1161,6 +1172,7 @@ specifiers:
   feed: ^4.2.1
   install: ^0.13.0
   jsdom: ^16.4.0
+  keyv: ^4.0.3
   node-fetch: ^2.6.1
   npm: ^6.14.8
   rss-parser: ^3.9.0
