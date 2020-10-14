@@ -15,7 +15,7 @@ const cache = new Keyv();
 
 fastify.get("/", async (req, res) => {
 	const url = req.query["url"];
-	const cached = cache.get(url);
+	const cached = await cache.get(url);
 	if (!cached) {
 		const feed = await rssParser.parseURL(url);
 		for (const item of feed.items) {
@@ -24,7 +24,7 @@ fastify.get("/", async (req, res) => {
 			item["content:encoded"] = readable;
 		}
 		const result = feedToXml(feed);
-		cache.set(url, result, 10 * 60 * 60 * 1000);
+		await cache.set(url, result, 10 * 60 * 60 * 1000);
 		res.status(200).header("Content-Type", "text/xml").send(result);
 	}
 	res.status(200).header("Content-Type", "text/xml").send(cached);
