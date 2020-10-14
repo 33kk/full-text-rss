@@ -80,7 +80,7 @@ function feedToXml(feed: RSSParser.Output) {
 			link: item.link,
 			author: [{ name: item.creator }],
 			content: item["content:encoded"] || item.content,
-			category: item.categories.map((e) => {
+			category: item.categories?.map((e: string) => {
 				return { name: e };
 			}),
 		});
