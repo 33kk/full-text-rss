@@ -67,8 +67,8 @@ function feedToXml(feed: RSSParser.Output) {
 		title: feed.title,
 		description: feed.description,
 		copyright: feed.title,
-		favicon: feed.image.url,
-		image: feed.image.url,
+		favicon: feed.image?.url,
+		image: feed.image?.url,
 	});
 	for (const item of feed.items) {
 		newFeed.addItem({
