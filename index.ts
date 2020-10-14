@@ -15,7 +15,7 @@ const cache = new Keyv();
 
 fastify.get("/", async (req, res) => {
 	const url = req.query["url"];
-	const cached = await cache.get(url);
+	const cached = false && (await cache.get(url));
 	if (!cached) {
 		const feed = await rssParser.parseURL(url);
 		for (const item of feed.items) {
@@ -41,26 +41,21 @@ async function exists(path: string) {
 
 async function getReadablePage(url: string) {
 	const hash = md5(url);
-	let html = "";
-	let cacheHit = false;
 	if (await exists(path.resolve(__dirname, "cache", hash))) {
-		html = await fs.readFile(path.resolve(__dirname, "cache", hash), {
+		return await fs.readFile(path.resolve(__dirname, "cache", hash), {
 			encoding: "utf8",
 		});
-		cacheHit = true;
 	} else {
 		console.log("Downloading article at", url);
-		html = await (await fetch(url)).text();
-	}
-	const doc = new JSDOM(html, { url });
-	const reader = new Readability(doc.window.document);
-	const readable = reader.parse().content;
-	if (!cacheHit) {
+		const html = await (await fetch(url)).text();
+		const doc = new JSDOM(html, { url });
+		const reader = new Readability(doc.window.document);
+		const readable = reader.parse().content;
 		await fs.writeFile(path.resolve(__dirname, "cache", hash), readable, {
 			encoding: "utf8",
 		});
+		return readable;
 	}
-	return readable;
 }
 
 function md5(str: string) {
