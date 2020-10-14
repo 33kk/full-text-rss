@@ -2,6 +2,7 @@ import { Feed } from "feed";
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
 import { promises as fs } from "fs";
+import Keyv from "keyv";
 import RSSParser from "rss-parser";
 import Fastify from "fastify";
 import fetch from "node-fetch";
@@ -10,17 +11,23 @@ import crypto from "crypto";
 
 const rssParser = new RSSParser();
 const fastify = Fastify({ logger: true });
+const cache = new Keyv();
 
 fastify.get("/", async (req, res) => {
 	const url = req.query["url"];
-	const feed = await rssParser.parseURL(url);
-	for (const item of feed.items) {
-		const readable = await getReadablePage(item.link);
-		item.content = readable;
-		item["content:encoded"] = readable;
+	const cached = cache.get(url);
+	if (!cached) {
+		const feed = await rssParser.parseURL(url);
+		for (const item of feed.items) {
+			const readable = await getReadablePage(item.link);
+			item.content = readable;
+			item["content:encoded"] = readable;
+		}
+		const result = feedToXml(feed);
+		cache.set(url, result, 10 * 60 * 60 * 1000);
+		res.status(200).header("Content-Type", "text/xml").send(result);
 	}
-	const result = feedToXml(feed);
-	res.status(200).header("Content-Type", "text/xml").send(result);
+	res.status(200).header("Content-Type", "text/xml").send(cached);
 });
 
 async function exists(path: string) {
