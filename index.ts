@@ -47,7 +47,7 @@ async function getReadablePage(url: string) {
 		});
 	} else {
 		console.log("Downloading article at", url);
-		const html = await (await fetch(url)).text();
+		const html = await fetch(url).then(r => r.text());
 		const doc = new JSDOM(html, { url });
 		const reader = new Readability(doc.window.document);
 		const readable = reader.parse().content;
