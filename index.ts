@@ -15,11 +15,14 @@ const cache = new Keyv();
 
 fastify.get("/", async (req, res) => {
 	const url = req.query["url"];
+	const selector = req.query["selector"];
+	const selectorText = req.query["selectorText"];
+	console.log(url, "---", selector);
 	const cached = false && (await cache.get(url));
 	if (!cached) {
 		const feed = await rssParser.parseURL(url);
 		for (const item of feed.items) {
-			const readable = await getReadablePage(item.link);
+			const readable = await getReadablePage(item.link, selector, selectorText);
 			if (readable) {
 				item.content = readable;
 				item["content:encoded"] = readable;
@@ -41,7 +44,7 @@ async function exists(path: string) {
 	}
 }
 
-async function getReadablePage(url: string) {
+async function getReadablePage(url: string, selector?: string, selectorText?: string) {
 	const hash = md5(url);
 	if (await exists(path.resolve(__dirname, "cache", hash))) {
 		return await fs.readFile(path.resolve(__dirname, "cache", hash), {
@@ -49,16 +52,44 @@ async function getReadablePage(url: string) {
 		});
 	} else {
 		console.log("Downloading article at", url);
-		const html = await fetch(url).then((r) => r.text());
-		const doc = new JSDOM(html, { url });
-		const reader = new Readability(doc.window.document);
-		const readable = reader.parse()?.content;
+		let html = await fetch(url).then((r) => r.text());
+		if (selector) {
+			const doc = new JSDOM(html, { url });
+			try {
+				let els = doc.window.document.querySelectorAll(selector);
+				if (selectorText) {
+					for (const el of els) {
+						if (el.textContent?.includes(selectorText)) {
+							url = el?.href;
+							break;
+						}
+					}
+				}
+				else {
+					url = els[0]?.href;
+				}
+				if (!url) return undefined;
+				html = await fetch(url).then((r) => r.text());
+			}
+			catch (e) {
+				console.error("selector error", e)
+				return undefined
+			}
+		}
+		const readable = await readability(url, html);
 		if (readable)
 			await fs.writeFile(path.resolve(__dirname, "cache", hash), readable, {
 				encoding: "utf8",
 			});
 		return readable;
 	}
+}
+
+async function readability(url: string, html: string) {
+	const doc = new JSDOM(html, { url });
+	const reader = new Readability(doc.window.document);
+	const readable = reader.parse()?.content;
+	return readable;
 }
 
 function md5(str: string) {
