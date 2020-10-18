@@ -20,8 +20,10 @@ fastify.get("/", async (req, res) => {
 		const feed = await rssParser.parseURL(url);
 		for (const item of feed.items) {
 			const readable = await getReadablePage(item.link);
-			item.content = readable;
-			item["content:encoded"] = readable;
+			if (readable) {
+				item.content = readable;
+				item["content:encoded"] = readable;
+			}
 		}
 		const result = feedToXml(feed);
 		await cache.set(url, result, 10 * 60 * 60 * 1000);
@@ -47,13 +49,14 @@ async function getReadablePage(url: string) {
 		});
 	} else {
 		console.log("Downloading article at", url);
-		const html = await fetch(url).then(r => r.text());
+		const html = await fetch(url).then((r) => r.text());
 		const doc = new JSDOM(html, { url });
 		const reader = new Readability(doc.window.document);
-		const readable = reader.parse().content;
-		await fs.writeFile(path.resolve(__dirname, "cache", hash), readable, {
-			encoding: "utf8",
-		});
+		const readable = reader.parse()?.content;
+		if (readable)
+			await fs.writeFile(path.resolve(__dirname, "cache", hash), readable, {
+				encoding: "utf8",
+			});
 		return readable;
 	}
 }
